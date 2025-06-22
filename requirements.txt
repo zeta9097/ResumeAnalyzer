@@ -1,0 +1,15 @@
+# Core dependencies
+pytesseract
+python-docx
+PyMuPDF
+Pillow
+
+# HTTP clients
+requests
+httpx
+
+# Async support
+aiohttp  
+
+# Environment variable support
+python-dotenv
