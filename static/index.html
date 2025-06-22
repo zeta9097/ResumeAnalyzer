@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Resume Analyzer</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono:wght@400&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="static/styles.css" />
+    </head>
+    <body class="dark">
+        <!-- Toolbar -->
+        <div class="toolbar-fixed">
+            <button class="theme-toggle">🌌 Theme</button>
+            <button id="info-btn" class="info-btn">ℹ Info</button>
+        </div>
+
+        <!-- Modal Info Dialog -->
+        <div id="info-modal" class="info-modal">
+            <div class="info-modal-content">
+                <span id="close-info" class="close-btn">&times;</span>
+
+                <h2>📄 Resume Analyzer Overview</h2>
+                <p>
+                    This AI-powered Resume Analyzer is built to streamline the
+                    candidate screening process by intelligently comparing
+                    multiple resumes against a given job description.
+                </p>
+
+                <h3>✨ Key Capabilities:</h3>
+                <ul>
+                    <li>
+                        <strong>Bulk Resume Upload:</strong> Upload multiple
+                        DOC, DOCX, or PDF files in one go
+                    </li>
+                    <li>
+                        <strong>Job Description Matching:</strong> Paste your JD
+                        and get context-aware matching
+                    </li>
+                    <li>
+                        <strong>Top Match Ranking:</strong> View resumes ranked
+                        by overall relevance score
+                    </li>
+                    <li>
+                        <strong>Skill & Domain Analysis:</strong> See
+                        matched/missing skills and domain-specific alignment
+                    </li>
+                    <li>
+                        <strong>Interactive Results:</strong> Preview or
+                        download resumes with one click
+                    </li>
+                </ul>
+
+                <h3>📊 Scoring Breakdown:</h3>
+                <p>Resumes are scored based on multiple factors:</p>
+                <ul>
+                    <li>
+                        🔧 <strong>Skills Match</strong> — Extracted vs required
+                    </li>
+                    <li>
+                        💼 <strong>Experience Match</strong> — Role and industry
+                        relevance
+                    </li>
+                    <li>
+                        🎓 <strong>Education Match</strong> — Degrees,
+                        certifications
+                    </li>
+                    <li>
+                        🧠 <strong>Project Similarity</strong> — Relevant
+                        project work
+                    </li>
+                </ul>
+
+                <h3>💡 Built With:</h3>
+                <ul>
+                    <li>FastAPI (backend), HTML/CSS/JS (frontend)</li>
+                    <li>Transformer-based models (e.g., SBERT, LLMs)</li>
+                    <li>Optional CSV export, dark/light theme toggle</li>
+                </ul>
+
+                <p style="margin-top: 20px">
+                    Whether you're a recruiter, hiring manager, or building an
+                    ATS, this tool offers a fast, interactive, and intelligent
+                    resume evaluation workflow.
+                </p>
+            </div>
+        </div>
+
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+
+        <div class="main-layout">
+            <!-- LEFT: Form -->
+            <div class="container">
+                <div class="header">
+                    <h1>Resume Analyzer</h1>
+                    <p>
+                        Revolutionize your recruitment with next-gen resume
+                        screening
+                    </p>
+                </div>
+
+                <form id="resume-form" enctype="multipart/form-data">
+                    <div class="section">
+                        <h2>Upload Resumes</h2>
+                        <div class="upload-area" id="upload-area">
+                            <p>
+                                Click to select files or drag and drop<br />Supports
+                                PDF, DOCX files upto 5MB each
+                            </p>
+                            <input
+                                type="file"
+                                id="resume-files"
+                                name="resume"
+                                accept=".pdf,.doc,.docx"
+                                multiple
+                                required
+                                style="display: none"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Job Description</h2>
+                        <div class="job-description">
+                            <textarea
+                                id="jd-text"
+                                name="jd_text"
+                                required
+                                placeholder="Paste your job description here..."
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Analysis Settings</h2>
+                        <div class="analysis-settings">
+                            <label>Show Top</label>
+                            <input
+                                type="number"
+                                id="top-n"
+                                name="top_n"
+                                value="3"
+                                min="1"
+                                max="25"
+                                required
+                            />
+                            <span>candidates</span>
+                        </div>
+                    </div>
+                    <!-- Inside form -->
+                    <p id="status-text"></p>
+
+                    <div class="process-wrapper">
+                        <button type="submit" class="process-btn">
+                            Process Resumes
+                        </button>
+                        <div id="loading" style="display: none">
+                            <div class="spinner"></div>
+                            <div id="spinner-percent">0%</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RIGHT: Results -->
+            <div id="results-panel" style="display: none">
+                <div
+                    style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 15px;
+                    "
+                >
+                    <h2 style="margin: 0; font-family: 'Orbitron', sans-serif">
+                        Top Matches
+                    </h2>
+                    <button class="export-btn" onclick="exportToCSV()">
+                        ⬇ Export CSV
+                    </button>
+                </div>
+                <div id="results"></div>
+            </div>
+            <div id="preview-panel" style="display: none; margin-top: 20px">
+                <h3>📄 Resume Preview</h3>
+                <iframe
+                    id="resume-preview"
+                    style="
+                        width: 100%;
+                        height: 600px;
+                        border: 1px solid #60a5fa;
+                    "
+                    src=""
+                ></iframe>
+            </div>
+        </div>
+        <script src="static/script.js"></script>
+    </body>
+</html>
