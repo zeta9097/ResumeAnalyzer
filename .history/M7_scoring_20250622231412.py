@@ -1,7 +1,6 @@
 import httpx
 import json
 import re
-import os
 import asyncio
 from typing import List, Dict, Any
 
@@ -10,7 +9,6 @@ class ResumeJDScorerAsync:
     def __init__(self):
         self.api_key = os.getenv("GROQ_API_KEY")
         if not self.api_key:
-            raise ValueError("Missing GROQ_API_KEY in environment variables")
         self.api_url = "https://api.groq.com/openai/v1/chat/completions"
         self.headers = {
             "Content-Type": "application/json",
