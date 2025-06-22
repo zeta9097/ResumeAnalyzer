@@ -13,3 +13,5 @@ aiohttp
 
 # Environment variable support
 python-dotenv
+uvicorn
+fastapi
