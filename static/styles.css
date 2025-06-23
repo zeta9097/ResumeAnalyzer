@@ -321,6 +321,7 @@ body.light .job-description textarea {
 .analysis-settings {
     display: flex;
     align-items: center;
+    text-align: center;
     gap: 15px;
 }
 
@@ -340,6 +341,7 @@ body.light .analysis-settings span {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid #60a5fa;
     border-radius: 5px;
+    text-align: center;
     padding: 8px;
     color: #e2e8f0;
     outline: none;
@@ -627,6 +629,17 @@ body.light .details-btn:hover {
     animation: spin 1s linear infinite;
     display: block;
     box-sizing: border-box;
+}
+
+#top-n {
+    width: 60px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #60a5fa;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-align: center;
+    -moz-appearance: textfield;
 }
 
 .process-wrapper {

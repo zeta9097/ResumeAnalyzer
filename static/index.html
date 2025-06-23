@@ -155,9 +155,14 @@
                     <p id="status-text"></p>
 
                     <div class="process-wrapper">
-                        <button type="submit" class="process-btn">
-                            Process Resumes
-                        </button>
+                        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 12px; ">
+                            <button type="submit" class="process-btn">Process Resumes</button>
+                            <button type="button" class="process-btn" id="clear-btn" style="background: linear-gradient(45deg, #60a5fa, #a78bfa)">Clear All</button>
+
+
+
+                        </div>
+
                         <div id="loading" style="display: none">
                             <div class="spinner"></div>
                             <div id="spinner-percent">0%</div>

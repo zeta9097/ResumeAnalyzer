@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("DOM fully loaded");
+
     const themeToggle = document.querySelector(".theme-toggle");
     const uploadArea = document.getElementById("upload-area");
     const fileInput = document.getElementById("resume-files");
@@ -10,6 +11,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const topNInput = document.getElementById("top-n");
     let lastResults = [];
 
+    // Attach Clear All button handler first
+    const clearBtn = document.getElementById("clear-btn");
+    if (clearBtn) {
+        clearBtn.addEventListener("click", clearAll);
+    } else {
+        console.error("Clear button not found!");
+    }
+
+    // Info modal handlers
     document.getElementById("info-btn").addEventListener("click", () => {
         document.getElementById("info-modal").style.display = "block";
     });
@@ -49,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // File input handling
     uploadArea.addEventListener("click", () => fileInput.click());
+
     fileInput.addEventListener("change", (e) => {
         const files = e.target.files;
         const tooLarge = Array.from(files).some(file => file.size > 5 * 1024 * 1024);
@@ -61,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
         uploadArea.innerHTML = `<p>${files.length} file(s) selected</p>`;
     });
 
-    // Handle Top-N selector changes and rerender results if available
+    // Handle Top-N selector changes
     topNInput.addEventListener("change", () => {
         const newTopN = parseInt(topNInput.value, 10);
         if (lastResults.length > 0) {
@@ -82,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Submit handler with spinner + percent + form lock/unlock
+    // Submit handler
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         lockForm(true);
@@ -93,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!files.length) {
             alert("Please upload at least one resume.");
-            lockForm(false); // Unlock before returning
+            lockForm(false);
             return;
         }
 
@@ -108,30 +119,19 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("preview-panel").style.display = "none";
         document.getElementById("resume-preview").src = "";
 
-        loading.style.display = "flex"; // Show spinner container as flex for alignment
+        loading.style.display = "flex";
         document.getElementById("spinner-percent").innerText = "0%";
-
         resultsPanel.style.display = "none";
         resultsDiv.innerHTML = "";
 
-        let current = 0;
-        
-        // Demo interval to update % on spinner, since backend progress not available
-        const total = files.length;
-        const totalDurationMs = total * 3000;  // 3000 ms per file
-        const updateIntervalMs = 100;  // update every 100 ms for smooth percent updates
-        const steps = totalDurationMs / updateIntervalMs;  // total update ticks
-
         let currentStep = 0;
-
+        const totalSteps = 100;
         const interval = setInterval(() => {
             currentStep++;
-            const percent = Math.min(100, Math.round((currentStep / steps) * 100));
+            const percent = Math.min(100, Math.round((currentStep / totalSteps) * 100));
             document.getElementById("spinner-percent").innerText = `${percent}%`;
-            if (percent >= 100) {
-                clearInterval(interval);
-            }
-        }, updateIntervalMs);
+            if (percent >= 100) clearInterval(interval);
+        }, 30);
 
         try {
             const res = await fetch("/analyze", {
@@ -156,12 +156,11 @@ document.addEventListener("DOMContentLoaded", function () {
             loading.style.display = "none";
             clearInterval(interval);
             document.getElementById("spinner-percent").innerText = "100%";
-
-            lockForm(false); // Re-enable form
+            lockForm(false);
         }
     });
 
-    // Delegated click listeners for details toggle and export CSV
+    // Delegated click listeners
     document.addEventListener("click", function (event) {
         if (event.target.matches(".details-btn")) {
             const index = event.target.getAttribute("data-index");
@@ -172,7 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Render the top N results in the results panel
+    // Render results
     function renderResults(data, topN) {
         const topResults = data.slice(0, topN);
         let html = "";
@@ -207,7 +206,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         <strong>📧 Email:</strong> ${res.email || "N/A"}<br/>
                         <strong>📞 Phone:</strong> ${res.phone || "N/A"}<br/>
                         <strong>🚫 Missing Skills:</strong>
-                        <div class="missing-skills">${Array.isArray(res.missing_skills) && res.missing_skills.length > 0 ? res.missing_skills.join(", ") : "None"}</div>
+                        <div class="missing-skills">${
+                            Array.isArray(res.missing_skills) && res.missing_skills.length > 0
+                                ? res.missing_skills.join(", ")
+                                : "None"
+                        }</div>
                     </div>
                 </div>`;
         });
@@ -216,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
         resultsPanel.style.display = "block";
     }
 
-    // Global helper: Download original resume file
+    // Global functions
     window.downloadOriginalResume = function (fileUrl) {
         if (!fileUrl || fileUrl === "#") {
             alert("Original file not available.");
@@ -224,12 +227,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         const a = document.createElement("a");
         a.href = fileUrl;
-        a.download = ""; // Let browser determine filename
+        a.download = "";
         a.click();
         a.remove();
     };
 
-    // Global helper: Preview original resume file in new tab
     window.previewOriginalResume = function (fileUrl) {
         if (!fileUrl || fileUrl === "#") {
             alert("Original file not available.");
@@ -238,7 +240,6 @@ document.addEventListener("DOMContentLoaded", function () {
         window.open(fileUrl, "_blank");
     };
 
-    // Export displayed results to CSV
     window.exportToCSV = function () {
         if (!lastResults || lastResults.length === 0) {
             alert("No results to export.");
@@ -246,19 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const rows = [
-            [
-                "Rank",
-                "Name",
-                "Match %",
-                "Email",
-                "Phone",
-                "Skills Score",
-                "Experience Score",
-                "Education Score",
-                "Project Score",
-                "Domain Match Score",
-                "Missing Skills",
-            ],
+            ["Rank", "Name", "Match %", "Email", "Phone", "Skills Score", "Experience Score", "Education Score", "Project Score", "Domain Match Score", "Missing Skills"]
         ];
 
         lastResults.slice(0, parseInt(topNInput.value, 10)).forEach((res, i) => {
@@ -287,3 +276,38 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.removeChild(link);
     };
 });
+
+// Define clearAll globally so it can be called from HTML
+window.clearAll = function () {
+    console.log("CLEAR ALL CALLED ✅");
+    if (!confirm("Are you sure you want to clear everything?")) return;
+
+    const statusText = document.getElementById("status-text");
+    const spinnerPercent = document.getElementById("spinner-percent");
+    const uploadArea = document.getElementById("upload-area");
+
+    // Clear form
+    document.getElementById("resume-form").reset();
+
+    // Clear status text and progress
+    if (statusText) statusText.textContent = "";
+    if (spinnerPercent) spinnerPercent.textContent = "0%";
+
+    // Hide panels
+    document.getElementById("results-panel").style.display = "none";
+    document.getElementById("preview-panel").style.display = "none";
+
+    // Clear result content
+    document.getElementById("results").innerHTML = "";
+    document.getElementById("resume-preview").src = "";
+
+    // Reset upload area
+    if (uploadArea) {
+        uploadArea.innerHTML = `
+            <p>
+                Click to select files or drag and drop<br />Supports
+                PDF, DOCX files up to 5MB each
+            </p>
+        `;
+    }
+};
