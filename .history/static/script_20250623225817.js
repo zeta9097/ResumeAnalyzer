@@ -124,22 +124,14 @@ document.addEventListener("DOMContentLoaded", function () {
         resultsPanel.style.display = "none";
         resultsDiv.innerHTML = "";
 
-        // Demo interval to update % on spinner, since backend progress not available
-        const total = files.length;
-        const totalDurationMs = total * 3000;  // 3000 ms per file
-        const updateIntervalMs = 100;  // update every 100 ms for smooth percent updates
-        const steps = totalDurationMs / updateIntervalMs;  // total update ticks
-
         let currentStep = 0;
-
+        const totalSteps = 100;
         const interval = setInterval(() => {
             currentStep++;
-            const percent = Math.min(100, Math.round((currentStep / steps) * 100));
+            const percent = Math.min(100, Math.round((currentStep / totalSteps) * 100));
             document.getElementById("spinner-percent").innerText = `${percent}%`;
-            if (percent >= 100) {
-                clearInterval(interval);
-            }
-        }, updateIntervalMs);
+            if (percent >= 100) clearInterval(interval);
+        }, 30);
 
         try {
             const res = await fetch("/analyze", {
