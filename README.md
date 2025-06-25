@@ -1,5 +1,7 @@
 # ResumeAnalyzer
 
+Live on http://16.171.34.242:5000/
+
 This AI-powered Resume Analyzer is built to streamline the candidate screening process by intelligently comparing multiple resumes against a given job description.
 
 ✨ Key Capabilities:
